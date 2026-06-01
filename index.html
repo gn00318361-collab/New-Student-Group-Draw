@@ -401,12 +401,19 @@
 
     function copyResult() {
       if (!lastGroups.length) return;
+      const now = new Date();
+      const stamp = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+      const heading = lastGroups[0]?.label?.startsWith("三年級") ? "三年級新生分組結果"
+        : lastGroups[0]?.label?.startsWith("五年級") ? "五年級新生分組結果"
+        : "新生分組結果";
+      const totalPeople = lastGroups.reduce((sum, group) => sum + group.members.length, 0);
       const text = lastGroups.map((group, i) => {
         const title = group.label || `第 ${i + 1} 組`;
-        const members = group.members.map(s => `${s.name}（${s.category}/${s.grade}）`).join("、");
-        return `${title}：${members}`;
-      }).join("\n");
-      navigator.clipboard?.writeText(text);
+        const members = group.members.map(s => s.name).join("　");
+        return `${title}（${group.members.length}人）\n${members}`;
+      }).join("\n\n");
+      const output = `${heading}\n產生時間：${stamp}\n共 ${lastGroups.length} 組，${totalPeople} 人\n\n${text}`;
+      navigator.clipboard?.writeText(output);
     }
 
     function resetGroups() {
