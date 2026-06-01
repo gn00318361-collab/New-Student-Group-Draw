@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>115資優班新生三人以下分組</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #64748b;
+      --line: #d7dde8;
+      --paper: #fbfcff;
+      --panel: #ffffff;
+      --accent: #0f766e;
+      --accent-2: #b45309;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(120deg, rgba(15,118,110,.10), rgba(180,83,9,.08)),
+        var(--paper);
+    }
+    main {
+      width: min(1120px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 22px 0 36px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: end;
+      border-bottom: 2px solid var(--line);
+      padding-bottom: 14px;
+      margin-bottom: 16px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 30px;
+      letter-spacing: 0;
+    }
+    .sub {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    button, select {
+      height: 40px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      border-radius: 6px;
+      padding: 0 12px;
+      font-size: 15px;
+    }
+    button {
+      cursor: pointer;
+      font-weight: 700;
+    }
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .stat {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.78);
+      padding: 12px;
+      border-radius: 8px;
+    }
+    .stat b {
+      display: block;
+      font-size: 24px;
+      margin-bottom: 3px;
+    }
+    .stat span { color: var(--muted); font-size: 14px; }
+    .groups {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+    }
+    .group {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 8px;
+      overflow: hidden;
+      min-height: 170px;
+    }
+    .group-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 9px 11px;
+      background: #eef6f4;
+      border-bottom: 1px solid var(--line);
+      font-weight: 800;
+    }
+    .group-title span:last-child {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .student {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      padding: 10px 11px;
+      border-bottom: 1px dashed var(--line);
+      align-items: center;
+    }
+    .student:last-child { border-bottom: 0; }
+    .name { font-size: 22px; font-weight: 800; }
+    .tag {
+      color: var(--muted);
+      font-size: 13px;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .empty {
+      border: 1px dashed var(--line);
+      background: rgba(255,255,255,.72);
+      border-radius: 8px;
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+    }
+    .list {
+      margin-top: 18px;
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+    .chip {
+      border: 1px solid var(--line);
+      background: white;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 14px;
+    }
+    @media print {
+      body { background: white; }
+      main { width: 100%; padding: 0; }
+      header, .stats, .list { display: none; }
+      .groups { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .group { break-inside: avoid; min-height: 0; }
+      .name { font-size: 18px; }
+      .student { padding: 7px 9px; }
+    }
+    @media (max-width: 760px) {
+      header { align-items: stretch; flex-direction: column; }
+      .toolbar { justify-content: flex-start; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      h1 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>115資優班新生三人以下分組</h1>
+        <div class="sub">只含創造力新生。請依現場需求分別按「三年級新生分組」或「五年級新生分組」，每組最多 3 人。</div>
+      </div>
+      <div class="toolbar">
+        <button class="primary" id="drawGrade3Btn">三年級新生分組</button>
+        <button class="primary" id="drawGrade5Btn">五年級新生分組</button>
+        <button id="copyBtn">複製結果</button>
+        <button id="printBtn">列印</button>
+      </div>
+    </header>
+
+    <section class="stats">
+      <div class="stat"><b id="totalCount">0</b><span>新生總數</span></div>
+      <div class="stat"><b id="creative3">0</b><span>創造力二升三</span></div>
+      <div class="stat"><b id="creative5">0</b><span>創造力四升五</span></div>
+      <div class="stat"><b id="groupRule">≤3</b><span>每組人數</span></div>
+    </section>
+
+    <section id="groups" class="groups">
+      <div class="empty">尚未分組。請按「開始分組」。</div>
+    </section>
+
+    <section class="list">
+      <div class="sub">名單確認</div>
+      <div id="chips" class="chips"></div>
+    </section>
+  </main>
+
+  <script>
+    const students = [
+  {
+    "name": "連婕睎",
+    "category": "創造力",
+    "grade": "二升三",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "陳詠晴",
+    "category": "創造力",
+    "grade": "二升三",
+    "school": "東門國小"
+  },
+  {
+    "name": "李晴帆",
+    "category": "創造力",
+    "grade": "二升三",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "游家禎",
+    "category": "創造力",
+    "grade": "二升三",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "葉芮熙",
+    "category": "創造力",
+    "grade": "二升三",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "黃婧瑀",
+    "category": "創造力",
+    "grade": "二升三",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "王寀彤",
+    "category": "創造力",
+    "grade": "二升三",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "謝宇光",
+    "category": "創造力",
+    "grade": "二升三",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "王譯樂",
+    "category": "創造力",
+    "grade": "二升三",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "林沂恩",
+    "category": "創造力",
+    "grade": "二升三",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "朱妍昀",
+    "category": "創造力",
+    "grade": "二升三",
+    "school": "八德國小"
+  },
+  {
+    "name": "林昀潼",
+    "category": "創造力",
+    "grade": "二升三",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "陳歆艾",
+    "category": "創造力",
+    "grade": "二升三",
+    "school": "建德國小"
+  },
+  {
+    "name": "紀品聿",
+    "category": "創造力",
+    "grade": "二升三",
+    "school": "瑞峰國小"
+  },
+  {
+    "name": "廖聿遴",
+    "category": "創造力",
+    "grade": "四升五",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "陳芷緁",
+    "category": "創造力",
+    "grade": "四升五",
+    "school": "龜山國小"
+  },
+  {
+    "name": "黃彥綸",
+    "category": "創造力",
+    "grade": "四升五",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "林芝宇",
+    "category": "創造力",
+    "grade": "四升五",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "李苡安",
+    "category": "創造力",
+    "grade": "四升五",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "蔣和甫",
+    "category": "創造力",
+    "grade": "四升五",
+    "school": "南美國小"
+  },
+  {
+    "name": "鄭祺叡",
+    "category": "創造力",
+    "grade": "四升五",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "曾姿綺",
+    "category": "創造力",
+    "grade": "四升五",
+    "school": "桃園市青溪國民小學"
+  }
+];
+    const groupsEl = document.getElementById("groups");
+    const chipsEl = document.getElementById("chips");
+    let lastGroups = [];
+
+    function shuffle(items) {
+      const arr = [...items];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function chunkUpToThree(items) {
+      const groups = [];
+      let i = 0;
+      while (i < items.length) {
+        const remaining = items.length - i;
+        const size = remaining === 4 ? 2 : Math.min(3, remaining);
+        groups.push(items.slice(i, i + size));
+        i += size;
+      }
+      return groups;
+    }
+
+    function drawList(list, prefix) {
+      lastGroups = chunkUpToThree(shuffle(list)).map((members, i) => ({ label: `${prefix}第 ${i + 1} 組`, members }));
+      renderGroups();
+    }
+
+    function drawGrade(grade, label) {
+      drawList(students.filter(s => s.category === "創造力" && s.grade === grade), label);
+    }
+
+    function renderGroups() {
+      groupsEl.innerHTML = "";
+      lastGroups.forEach((group, index) => {
+        const card = document.createElement("article");
+        card.className = "group";
+        const title = document.createElement("div");
+        title.className = "group-title";
+        title.innerHTML = `<span>${group.label || `第 ${index + 1} 組`}</span><span>${group.members.length} 人</span>`;
+        card.appendChild(title);
+        group.members.forEach(student => {
+          const row = document.createElement("div");
+          row.className = "student";
+          row.innerHTML = `<div class="name">${student.name}</div><div class="tag">${student.category}<br>${student.grade}</div>`;
+          card.appendChild(row);
+        });
+        groupsEl.appendChild(card);
+      });
+    }
+
+    function copyResult() {
+      if (!lastGroups.length) draw();
+      const text = lastGroups.map((group, i) => {
+        const title = group.label || `第 ${i + 1} 組`;
+        const members = group.members.map(s => `${s.name}（${s.category}/${s.grade}）`).join("、");
+        return `${title}：${members}`;
+      }).join("\n");
+      navigator.clipboard?.writeText(text);
+    }
+
+    function init() {
+      document.getElementById("totalCount").textContent = students.length;
+      document.getElementById("creative3").textContent = students.filter(s => s.category === "創造力" && s.grade === "二升三").length;
+      document.getElementById("creative5").textContent = students.filter(s => s.category === "創造力" && s.grade === "四升五").length;
+      chipsEl.innerHTML = students.map(s => `<span class="chip">${s.name}｜${s.category}｜${s.grade}</span>`).join("");
+      document.getElementById("drawGrade3Btn").addEventListener("click", () => drawGrade("二升三", "三年級新生"));
+      document.getElementById("drawGrade5Btn").addEventListener("click", () => drawGrade("四升五", "五年級新生"));
+      document.getElementById("copyBtn").addEventListener("click", copyResult);
+      document.getElementById("printBtn").addEventListener("click", () => window.print());
+    }
+
+    init();
+  </script>
+</body>
+</html>
