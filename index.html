@@ -345,6 +345,8 @@
     const groupsEl = document.getElementById("groups");
     const chipsEl = document.getElementById("chips");
     let lastGroups = [];
+    let grade3Groups = [];
+    let grade5Groups = [];
 
     function shuffle(items) {
       const arr = [...items];
@@ -368,7 +370,10 @@
     }
 
     function drawList(list, prefix) {
-      lastGroups = chunkUpToThree(shuffle(list)).map((members, i) => ({ label: `${prefix}第 ${i + 1} 組`, members }));
+      const groups = chunkUpToThree(shuffle(list)).map((members, i) => ({ label: `${prefix}第 ${i + 1} 組`, members }));
+      lastGroups = groups;
+      if (prefix.startsWith("三年級")) grade3Groups = groups;
+      if (prefix.startsWith("五年級")) grade5Groups = groups;
       renderGroups();
     }
 
@@ -418,7 +423,22 @@
 
     function resetGroups() {
       lastGroups = [];
+      grade3Groups = [];
+      grade5Groups = [];
       renderGroups();
+    }
+
+    function printWhenReady() {
+      if (!grade3Groups.length || !grade5Groups.length) {
+        const missing = [];
+        if (!grade3Groups.length) missing.push("三年級新生分組");
+        if (!grade5Groups.length) missing.push("五年級新生分組");
+        alert(`請先完成：${missing.join("、")}，再列印。`);
+        return;
+      }
+      lastGroups = [...grade3Groups, ...grade5Groups];
+      renderGroups();
+      window.print();
     }
 
     function init() {
@@ -430,7 +450,7 @@
       document.getElementById("drawGrade5Btn").addEventListener("click", () => drawGrade("四升五", "五年級新生"));
       document.getElementById("resetBtn").addEventListener("click", resetGroups);
       document.getElementById("copyBtn").addEventListener("click", copyResult);
-      document.getElementById("printBtn").addEventListener("click", () => window.print());
+      document.getElementById("printBtn").addEventListener("click", printWhenReady);
     }
 
     init();
