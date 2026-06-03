@@ -124,8 +124,6 @@
       border-bottom: 1px dashed var(--line);
       align-items: center;
     }
-    .student.status-new { background: #ecfdf5; }
-    .student.status-old { background: #fff7ed; }
     .student:last-child { border-bottom: 0; }
     .name { font-size: 22px; font-weight: 800; }
     .tag {
@@ -158,16 +156,6 @@
       border-radius: 999px;
       padding: 5px 9px;
       font-size: 14px;
-    }
-    .chip.status-new {
-      background: #dcfce7;
-      border-color: #86efac;
-      color: #14532d;
-    }
-    .chip.status-old {
-      background: #ffedd5;
-      border-color: #fdba74;
-      color: #7c2d12;
     }
     @media print {
       body { background: white; }
@@ -203,7 +191,7 @@
     </header>
 
     <section class="stats">
-      <div class="stat"><b id="totalCount">0</b><span>新生總數</span></div>
+      <div class="stat"><b id="totalCount">0</b><span>名單總數</span></div>
       <div class="stat"><b id="creative3">0</b><span>創造力二升三</span></div>
       <div class="stat"><b id="creative5">0</b><span>五年級分組名單</span></div>
       <div class="stat"><b id="groupRule">≤3</b><span>每組人數</span></div>
@@ -431,24 +419,6 @@
     let lastGroups = [];
     let grade3Groups = [];
     let grade5Groups = [];
-    const oldStudentNames = new Set([
-      "林侑澄",
-      "李依珊",
-      "王思元",
-      "黃苡喬",
-      "簡嘉辰",
-      "連永真",
-      "郭柏妤",
-      "陳品睿",
-      "陳約翰",
-      "劉勝心",
-      "邱郅崴",
-      "石蕓禎"
-    ]);
-
-    function studentStatus(student) {
-      return oldStudentNames.has(student.name) ? "舊生" : "新生";
-    }
 
     function shuffle(items) {
       const arr = [...items];
@@ -471,26 +441,7 @@
       return groups;
     }
 
-    function chunkGrade5WithNewStudent(items) {
-      const newStudents = shuffle(items.filter(s => studentStatus(s) === "新生"));
-      const oldStudents = shuffle(items.filter(s => studentStatus(s) === "舊生"));
-      const groupCount = Math.ceil(items.length / 3);
-      if (newStudents.length < groupCount) {
-        alert("五年級新生人數不足，無法讓每組都有新生。");
-        return chunkUpToThree(shuffle(items));
-      }
-
-      const groups = newStudents.slice(0, groupCount).map(student => [student]);
-      const remaining = shuffle([...newStudents.slice(groupCount), ...oldStudents]);
-      const slots = shuffle(groups.flatMap((_, index) => [index, index]));
-
-      remaining.forEach(student => {
-        const slotIndex = slots.findIndex(index => groups[index].length < 3);
-        if (slotIndex === -1) return;
-        const groupIndex = slots.splice(slotIndex, 1)[0];
-        groups[groupIndex].push(student);
-      });
-
+    function putSmallGroupsLast(groups) {
       return [
         ...shuffle(groups.filter(group => group.length === 3)),
         ...shuffle(groups.filter(group => group.length < 3))
@@ -499,7 +450,7 @@
 
     function drawList(list, prefix) {
       const groupedMembers = prefix.startsWith("五年級")
-        ? chunkGrade5WithNewStudent(list)
+        ? putSmallGroupsLast(chunkUpToThree(shuffle(list)))
         : chunkUpToThree(shuffle(list));
       const groups = groupedMembers.map((members, i) => ({ label: `${prefix}第 ${i + 1} 組`, members }));
       lastGroups = groups;
@@ -515,11 +466,7 @@
     }
 
     function renderChips(list) {
-      chipsEl.innerHTML = list.map(s => {
-        const status = studentStatus(s);
-        const statusClass = status === "新生" ? "status-new" : "status-old";
-        return `<span class="chip ${statusClass}">${s.name}｜${s.category}｜${s.grade}｜${status}</span>`;
-      }).join("");
+      chipsEl.innerHTML = list.map(s => `<span class="chip">${s.name}｜${s.category}｜${s.grade}</span>`).join("");
     }
 
     function renderGroups() {
@@ -537,9 +484,8 @@
         card.appendChild(title);
         group.members.forEach(student => {
           const row = document.createElement("div");
-          const status = studentStatus(student);
-          row.className = `student ${status === "新生" ? "status-new" : "status-old"}`;
-          row.innerHTML = `<div class="name">${student.name}</div><div class="tag">${student.category}<br>${student.grade}<br>${status}</div>`;
+          row.className = "student";
+          row.innerHTML = `<div class="name">${student.name}</div><div class="tag">${student.category}<br>${student.grade}</div>`;
           card.appendChild(row);
         });
         groupsEl.appendChild(card);
@@ -556,7 +502,7 @@
       const totalPeople = lastGroups.reduce((sum, group) => sum + group.members.length, 0);
       const text = lastGroups.map((group, i) => {
         const title = group.label || `第 ${i + 1} 組`;
-        const members = group.members.map(s => `${s.name}（${studentStatus(s)}）`).join("　");
+        const members = group.members.map(s => s.name).join("　");
         return `${title}（${group.members.length}人）\n${members}`;
       }).join("\n\n");
       const output = `${heading}\n產生時間：${stamp}\n共 ${lastGroups.length} 組，${totalPeople} 人\n\n${text}`;
@@ -585,7 +531,7 @@
     }
 
     function init() {
-      document.getElementById("totalCount").textContent = students.filter(s => studentStatus(s) === "新生").length;
+      document.getElementById("totalCount").textContent = students.length;
       document.getElementById("creative3").textContent = students.filter(s => s.category === "創造力" && s.grade === "二升三").length;
       document.getElementById("creative5").textContent = students.filter(s => s.category === "創造力" && s.grade === "四升五").length;
       renderChips(students);
