@@ -491,7 +491,10 @@
         groups[groupIndex].push(student);
       });
 
-      return shuffle(groups);
+      return [
+        ...shuffle(groups.filter(group => group.length === 3)),
+        ...shuffle(groups.filter(group => group.length < 3))
+      ];
     }
 
     function drawList(list, prefix) {
