@@ -294,6 +294,78 @@
     "school": "瑞峰國小"
   },
   {
+    "name": "林侑澄",
+    "category": "創造力",
+    "grade": "四升五",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "李依珊",
+    "category": "創造力",
+    "grade": "四升五",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "王思元",
+    "category": "創造力",
+    "grade": "四升五",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "黃苡喬",
+    "category": "創造力",
+    "grade": "四升五",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "簡嘉辰",
+    "category": "創造力",
+    "grade": "四升五",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "連永真",
+    "category": "創造力",
+    "grade": "四升五",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "郭柏妤",
+    "category": "創造力",
+    "grade": "四升五",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "陳品睿",
+    "category": "創造力",
+    "grade": "四升五",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "陳約翰",
+    "category": "創造力",
+    "grade": "四升五",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "劉勝心",
+    "category": "創造力",
+    "grade": "四升五",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "邱郅崴",
+    "category": "創造力",
+    "grade": "四升五",
+    "school": "桃園市青溪國民小學"
+  },
+  {
+    "name": "石蕓禎",
+    "category": "創造力",
+    "grade": "四升五",
+    "school": "桃園市青溪國民小學"
+  },
+  {
     "name": "廖聿遴",
     "category": "創造力",
     "grade": "四升五",
@@ -378,7 +450,13 @@
     }
 
     function drawGrade(grade, label) {
-      drawList(students.filter(s => s.category === "創造力" && s.grade === grade), label);
+      const list = students.filter(s => s.category === "創造力" && s.grade === grade);
+      renderChips(list);
+      drawList(list, label);
+    }
+
+    function renderChips(list) {
+      chipsEl.innerHTML = list.map(s => `<span class="chip">${s.name}｜${s.category}｜${s.grade}</span>`).join("");
     }
 
     function renderGroups() {
@@ -425,6 +503,7 @@
       lastGroups = [];
       grade3Groups = [];
       grade5Groups = [];
+      renderChips(students);
       renderGroups();
     }
 
@@ -445,7 +524,7 @@
       document.getElementById("totalCount").textContent = students.length;
       document.getElementById("creative3").textContent = students.filter(s => s.category === "創造力" && s.grade === "二升三").length;
       document.getElementById("creative5").textContent = students.filter(s => s.category === "創造力" && s.grade === "四升五").length;
-      chipsEl.innerHTML = students.map(s => `<span class="chip">${s.name}｜${s.category}｜${s.grade}</span>`).join("");
+      renderChips(students);
       document.getElementById("drawGrade3Btn").addEventListener("click", () => drawGrade("二升三", "三年級新生"));
       document.getElementById("drawGrade5Btn").addEventListener("click", () => drawGrade("四升五", "五年級新生"));
       document.getElementById("resetBtn").addEventListener("click", resetGroups);
