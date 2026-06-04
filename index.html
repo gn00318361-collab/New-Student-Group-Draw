@@ -19,6 +19,7 @@
       margin: 0;
       min-height: 100vh;
       font-family: "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif;
+      font-size: 17px;
       color: var(--ink);
       background:
         linear-gradient(120deg, rgba(15,118,110,.10), rgba(180,83,9,.08)),
@@ -40,13 +41,13 @@
     }
     h1 {
       margin: 0;
-      font-size: 30px;
+      font-size: 32px;
       letter-spacing: 0;
     }
     .sub {
       margin-top: 6px;
       color: var(--muted);
-      font-size: 15px;
+      font-size: 16px;
     }
     .toolbar {
       display: flex;
@@ -61,7 +62,7 @@
       color: var(--ink);
       border-radius: 6px;
       padding: 0 12px;
-      font-size: 15px;
+      font-size: 16px;
     }
     button {
       cursor: pointer;
@@ -83,13 +84,34 @@
       background: rgba(255,255,255,.78);
       padding: 12px;
       border-radius: 8px;
+      position: relative;
+      overflow: hidden;
     }
+    .stat::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 5px;
+      background: transparent;
+    }
+    .stat.grade-3 {
+      border-color: #9ccdc8;
+      background: #f0faf8;
+    }
+    .stat.grade-3::before { background: #0f766e; }
+    .stat.grade-3 b { color: #0f766e; }
+    .stat.grade-5 {
+      border-color: #f0c38b;
+      background: #fff8ec;
+    }
+    .stat.grade-5::before { background: #b45309; }
+    .stat.grade-5 b { color: #b45309; }
     .stat b {
       display: block;
-      font-size: 24px;
+      font-size: 26px;
       margin-bottom: 3px;
     }
-    .stat span { color: var(--muted); font-size: 14px; }
+    .stat span { color: var(--muted); font-size: 15px; }
     .groups {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -125,10 +147,10 @@
       align-items: center;
     }
     .student:last-child { border-bottom: 0; }
-    .name { font-size: 22px; font-weight: 800; }
+    .name { font-size: 24px; font-weight: 800; }
     .tag {
       color: var(--muted);
-      font-size: 13px;
+      font-size: 14px;
       text-align: right;
       white-space: nowrap;
     }
@@ -146,16 +168,53 @@
       padding-top: 14px;
     }
     .chips {
+      display: grid;
+      gap: 12px;
+    }
+    .chip-section {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 11px;
+    }
+    .chip-section.grade-3 {
+      border-color: #9ccdc8;
+      background: #f0faf8;
+    }
+    .chip-section.grade-5 {
+      border-color: #f0c38b;
+      background: #fff8ec;
+    }
+    .chip-section-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 9px;
+      font-size: 18px;
+      font-weight: 800;
+    }
+    .chip-section.grade-3 .chip-section-title { color: #0f5f59; }
+    .chip-section.grade-5 .chip-section-title { color: #91400b; }
+    .chip-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 7px;
+      gap: 8px;
     }
     .chip {
       border: 1px solid var(--line);
       background: white;
       border-radius: 999px;
-      padding: 5px 9px;
-      font-size: 14px;
+      padding: 7px 11px;
+      font-size: 16px;
+    }
+    .chip.grade-3 {
+      border-color: #9ccdc8;
+      background: #f0faf8;
+      color: #0f5f59;
+    }
+    .chip.grade-5 {
+      border-color: #f0c38b;
+      background: #fff8ec;
+      color: #91400b;
     }
     @media print {
       body { background: white; }
@@ -179,11 +238,11 @@
     <header>
       <div>
         <h1>115資優班創造力三人以下分組</h1>
-        <div class="sub">請依現場需求分別按「三年級新生分組」或「五年級名單分組」，每組最多 3 人。</div>
+        <div class="sub">請依現場需求分別按「三年級新生分組」或「五年級學生分組」，每組最多 3 人。</div>
       </div>
       <div class="toolbar">
         <button class="primary" id="drawGrade3Btn">三年級新生分組</button>
-        <button class="primary" id="drawGrade5Btn">五年級名單分組</button>
+        <button class="primary" id="drawGrade5Btn">五年級學生分組</button>
         <button id="resetBtn">歸零</button>
         <button id="copyBtn">複製結果</button>
         <button id="printBtn">列印</button>
@@ -192,8 +251,8 @@
 
     <section class="stats">
       <div class="stat"><b id="totalCount">0</b><span>名單總數</span></div>
-      <div class="stat"><b id="creative3">0</b><span>創造力二升三</span></div>
-      <div class="stat"><b id="creative5">0</b><span>五年級分組名單</span></div>
+      <div class="stat grade-3"><b id="creative3">0</b><span>三年級新生</span></div>
+      <div class="stat grade-5"><b id="creative5">0</b><span>五年級學生</span></div>
       <div class="stat"><b id="groupRule">≤3</b><span>每組人數</span></div>
     </section>
 
@@ -209,211 +268,41 @@
 
   <script>
     const students = [
-  {
-    "name": "連婕睎",
-    "category": "創造力",
-    "grade": "二升三",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "陳詠晴",
-    "category": "創造力",
-    "grade": "二升三",
-    "school": "東門國小"
-  },
-  {
-    "name": "李晴帆",
-    "category": "創造力",
-    "grade": "二升三",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "游家禎",
-    "category": "創造力",
-    "grade": "二升三",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "葉芮熙",
-    "category": "創造力",
-    "grade": "二升三",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "黃婧瑀",
-    "category": "創造力",
-    "grade": "二升三",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "王寀彤",
-    "category": "創造力",
-    "grade": "二升三",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "謝宇光",
-    "category": "創造力",
-    "grade": "二升三",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "王譯樂",
-    "category": "創造力",
-    "grade": "二升三",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "林沂恩",
-    "category": "創造力",
-    "grade": "二升三",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "朱妍昀",
-    "category": "創造力",
-    "grade": "二升三",
-    "school": "八德國小"
-  },
-  {
-    "name": "林昀潼",
-    "category": "創造力",
-    "grade": "二升三",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "陳歆艾",
-    "category": "創造力",
-    "grade": "二升三",
-    "school": "建德國小"
-  },
-  {
-    "name": "紀品聿",
-    "category": "創造力",
-    "grade": "二升三",
-    "school": "瑞峰國小"
-  },
-  {
-    "name": "林侑澄",
-    "category": "創造力",
-    "grade": "四升五",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "李依珊",
-    "category": "創造力",
-    "grade": "四升五",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "王思元",
-    "category": "創造力",
-    "grade": "四升五",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "黃苡喬",
-    "category": "創造力",
-    "grade": "四升五",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "簡嘉辰",
-    "category": "創造力",
-    "grade": "四升五",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "連永真",
-    "category": "創造力",
-    "grade": "四升五",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "郭柏妤",
-    "category": "創造力",
-    "grade": "四升五",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "陳品睿",
-    "category": "創造力",
-    "grade": "四升五",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "陳約翰",
-    "category": "創造力",
-    "grade": "四升五",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "劉勝心",
-    "category": "創造力",
-    "grade": "四升五",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "邱郅崴",
-    "category": "創造力",
-    "grade": "四升五",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "石蕓禎",
-    "category": "創造力",
-    "grade": "四升五",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "廖聿遴",
-    "category": "創造力",
-    "grade": "四升五",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "陳芷緁",
-    "category": "創造力",
-    "grade": "四升五",
-    "school": "龜山國小"
-  },
-  {
-    "name": "黃彥綸",
-    "category": "創造力",
-    "grade": "四升五",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "林芝宇",
-    "category": "創造力",
-    "grade": "四升五",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "李苡安",
-    "category": "創造力",
-    "grade": "四升五",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "蔣和甫",
-    "category": "創造力",
-    "grade": "四升五",
-    "school": "南美國小"
-  },
-  {
-    "name": "鄭祺叡",
-    "category": "創造力",
-    "grade": "四升五",
-    "school": "桃園市青溪國民小學"
-  },
-  {
-    "name": "曾姿綺",
-    "category": "創造力",
-    "grade": "四升五",
-    "school": "桃園市青溪國民小學"
-  }
-];
+      { name: "連婕睎", category: "創造力", grade: "三年級", school: "" },
+      { name: "陳詠晴", category: "創造力", grade: "三年級", school: "" },
+      { name: "李晴帆", category: "創造力", grade: "三年級", school: "" },
+      { name: "游家禎", category: "創造力", grade: "三年級", school: "" },
+      { name: "葉芮熙", category: "創造力", grade: "三年級", school: "" },
+      { name: "黃婧瑀", category: "創造力", grade: "三年級", school: "" },
+      { name: "王寀彤", category: "創造力", grade: "三年級", school: "" },
+      { name: "謝宇光", category: "創造力", grade: "三年級", school: "" },
+      { name: "王譯樂", category: "創造力", grade: "三年級", school: "" },
+      { name: "林沂恩", category: "創造力", grade: "三年級", school: "" },
+      { name: "朱妍昀", category: "創造力", grade: "三年級", school: "" },
+      { name: "林昀潼", category: "創造力", grade: "三年級", school: "" },
+      { name: "陳歆艾", category: "創造力", grade: "三年級", school: "" },
+      { name: "紀品聿", category: "創造力", grade: "三年級", school: "" },
+      { name: "林侑澄", category: "創造力", grade: "五年級", school: "" },
+      { name: "李依珊", category: "創造力", grade: "五年級", school: "" },
+      { name: "王思元", category: "創造力", grade: "五年級", school: "" },
+      { name: "黃苡喬", category: "創造力", grade: "五年級", school: "" },
+      { name: "簡嘉辰", category: "創造力", grade: "五年級", school: "" },
+      { name: "連永真", category: "創造力", grade: "五年級", school: "" },
+      { name: "郭柏妤", category: "創造力", grade: "五年級", school: "" },
+      { name: "陳品睿", category: "創造力", grade: "五年級", school: "" },
+      { name: "陳約翰", category: "創造力", grade: "五年級", school: "" },
+      { name: "劉勝心", category: "創造力", grade: "五年級", school: "" },
+      { name: "邱郅崴", category: "創造力", grade: "五年級", school: "" },
+      { name: "石蕓禎", category: "創造力", grade: "五年級", school: "" },
+      { name: "廖聿遴", category: "創造力", grade: "五年級", school: "" },
+      { name: "陳芷緁", category: "創造力", grade: "五年級", school: "" },
+      { name: "黃彥綸", category: "創造力", grade: "五年級", school: "" },
+      { name: "林芝宇", category: "創造力", grade: "五年級", school: "" },
+      { name: "李苡安", category: "創造力", grade: "五年級", school: "" },
+      { name: "蔣和甫", category: "創造力", grade: "五年級", school: "" },
+      { name: "鄭祺叡", category: "創造力", grade: "五年級", school: "" },
+      { name: "曾姿綺", category: "創造力", grade: "五年級", school: "" }
+    ];
     const groupsEl = document.getElementById("groups");
     const chipsEl = document.getElementById("chips");
     let lastGroups = [];
@@ -441,6 +330,19 @@
       return groups;
     }
 
+    function chunkBySizes(items, sizes) {
+      const groups = [];
+      let i = 0;
+      sizes.forEach(size => {
+        groups.push(items.slice(i, i + size));
+        i += size;
+      });
+      if (i < items.length) {
+        groups.push(...chunkUpToThree(items.slice(i)));
+      }
+      return groups.filter(group => group.length);
+    }
+
     function putSmallGroupsLast(groups) {
       return [
         ...shuffle(groups.filter(group => group.length === 3)),
@@ -449,9 +351,7 @@
     }
 
     function drawList(list, prefix) {
-      const groupedMembers = prefix.startsWith("五年級")
-        ? putSmallGroupsLast(chunkUpToThree(shuffle(list)))
-        : chunkUpToThree(shuffle(list));
+      const groupedMembers = putSmallGroupsLast(chunkUpToThree(shuffle(list)));
       const groups = groupedMembers.map((members, i) => ({ label: `${prefix}第 ${i + 1} 組`, members }));
       lastGroups = groups;
       if (prefix.startsWith("三年級")) grade3Groups = groups;
@@ -466,13 +366,31 @@
     }
 
     function renderChips(list) {
-      chipsEl.innerHTML = list.map(s => `<span class="chip">${s.name}｜${s.category}｜${s.grade}</span>`).join("");
+      const sections = [
+        { grade: "三年級", title: "三年級新生", className: "grade-3" },
+        { grade: "五年級", title: "五年級學生", className: "grade-5" }
+      ].map(section => ({
+        ...section,
+        members: list.filter(s => s.grade === section.grade)
+      })).filter(section => section.members.length);
+
+      chipsEl.innerHTML = sections.map(section => `
+        <section class="chip-section ${section.className}">
+          <div class="chip-section-title">
+            <span>${section.title}</span>
+            <span>${section.members.length} 人</span>
+          </div>
+          <div class="chip-row">
+            ${section.members.map(s => `<span class="chip ${section.className}">${s.name}｜${s.category}｜${s.grade}</span>`).join("")}
+          </div>
+        </section>
+      `).join("");
     }
 
     function renderGroups() {
       groupsEl.innerHTML = "";
       if (!lastGroups.length) {
-        groupsEl.innerHTML = '<div class="empty">尚未分組。請按「三年級新生分組」或「五年級名單分組」。</div>';
+        groupsEl.innerHTML = '<div class="empty">尚未分組。請按「三年級新生分組」或「五年級學生分組」。</div>';
         return;
       }
       lastGroups.forEach((group, index) => {
@@ -497,7 +415,7 @@
       const now = new Date();
       const stamp = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
       const heading = lastGroups[0]?.label?.startsWith("三年級") ? "三年級新生分組結果"
-        : lastGroups[0]?.label?.startsWith("五年級") ? "五年級名單分組結果"
+        : lastGroups[0]?.label?.startsWith("五年級") ? "五年級學生分組結果"
         : "新生分組結果";
       const totalPeople = lastGroups.reduce((sum, group) => sum + group.members.length, 0);
       const text = lastGroups.map((group, i) => {
@@ -521,7 +439,7 @@
       if (!grade3Groups.length || !grade5Groups.length) {
         const missing = [];
         if (!grade3Groups.length) missing.push("三年級新生分組");
-        if (!grade5Groups.length) missing.push("五年級名單分組");
+        if (!grade5Groups.length) missing.push("五年級學生分組");
         alert(`請先完成：${missing.join("、")}，再列印。`);
         return;
       }
@@ -532,11 +450,11 @@
 
     function init() {
       document.getElementById("totalCount").textContent = students.length;
-      document.getElementById("creative3").textContent = students.filter(s => s.category === "創造力" && s.grade === "二升三").length;
-      document.getElementById("creative5").textContent = students.filter(s => s.category === "創造力" && s.grade === "四升五").length;
+      document.getElementById("creative3").textContent = students.filter(s => s.category === "創造力" && s.grade === "三年級").length;
+      document.getElementById("creative5").textContent = students.filter(s => s.category === "創造力" && s.grade === "五年級").length;
       renderChips(students);
-      document.getElementById("drawGrade3Btn").addEventListener("click", () => drawGrade("二升三", "三年級新生"));
-      document.getElementById("drawGrade5Btn").addEventListener("click", () => drawGrade("四升五", "五年級名單"));
+      document.getElementById("drawGrade3Btn").addEventListener("click", () => drawGrade("三年級", "三年級新生"));
+      document.getElementById("drawGrade5Btn").addEventListener("click", () => drawGrade("五年級", "五年級學生"));
       document.getElementById("resetBtn").addEventListener("click", resetGroups);
       document.getElementById("copyBtn").addEventListener("click", copyResult);
       document.getElementById("printBtn").addEventListener("click", printWhenReady);
